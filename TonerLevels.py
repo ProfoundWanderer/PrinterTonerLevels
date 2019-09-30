@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import JsonHelper
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import smtplib
 import ssl
@@ -40,13 +41,26 @@ def main():
 
     # the directory with the .rrd files
     file_directory = (
-        "/home/derrick/Documents/rra_test"
+        "C:\\Users\\derrick.freeman\\PycharmProjects\\PrinterLevels\\test_rra"
     )
 
     data = DataHelpers.grab_data(file_directory, toner_file_list)
     JsonHelper.toner_history(data)
 
     logging.info("TonerLevels.py script has ended.")
+
+
+def log_setup():
+    """
+    Just for a easy reminder so the file doesn't get too large over time.
+    """
+    logging.basicConfig(
+        handlers=[RotatingFileHandler('./toner_log.log', mode='a', maxBytes=1 * 1024 * 1024, backupCount=1,
+                                      encoding='utf-8', delay=0)],
+        format='%(asctime)s | %(levelname)s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=logging.INFO,
+    )
 
 
 def send_email(low_level_message, level_increase_message):
@@ -112,11 +126,6 @@ def send_email(low_level_message, level_increase_message):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s | %(levelname)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        filename="tonerlevels.log",
-        level=logging.INFO,
-    )
+    log_setup()
     logging.info("TonerLevels.py script has started.")
     main()
