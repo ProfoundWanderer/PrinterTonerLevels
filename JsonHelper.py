@@ -44,6 +44,8 @@ def toner_history(combined_info):
     today_dict = current_data['printerinfo']
 
     for yesterday_dict_item, today_dict_item in zip(yesterday_dict, today_dict):
+        logging.info(f"The {today_dict_item['office_and_name']}({today_dict_item['id']}) printer is at "
+                     f"{today_dict_item['level']}% {today_dict_item['color']} toner as of {current_time}.")
         if today_dict_item['level'] <= 10:
             low_toner_message += (
                 f"The {today_dict_item['office_and_name']} printer is at {today_dict_item['level']}% "
@@ -63,11 +65,11 @@ def toner_history(combined_info):
         logging.info("TonerLevels.py script has ended.")
         with open("previous_day.json", "w", encoding="utf-8") as f:
             json.dump(combined_info, f, ensure_ascii=False, indent=4)
-            logging.info("Saved today's levels as previous_day.json")
+            logging.info("All good: Saved today's levels as previous_day.json")
         sys.exit(0)
 
     with open("previous_day.json", "w", encoding="utf-8") as f:
         json.dump(combined_info, f, ensure_ascii=False, indent=4)
-        logging.info("Saved today's levels as previous_day.json")
+        logging.info("Check Levels: Saved today's levels as previous_day.json")
 
     TonerLevels.send_email(low_toner_message, level_change_message)

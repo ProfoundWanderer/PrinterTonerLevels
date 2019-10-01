@@ -2,12 +2,11 @@
 
 import config
 import DataHelpers
+import JsonHelper
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import JsonHelper
 import logging
 from logging.handlers import RotatingFileHandler
-import os
 import smtplib
 import ssl
 import sys
@@ -41,7 +40,7 @@ def main():
 
     # the directory with the .rrd files
     file_directory = (
-        "C:\\Users\\derrick.freeman\\PycharmProjects\\PrinterLevels\\test_rra"
+        "/var/www/cacti-1.1.38/rra"
     )
 
     data = DataHelpers.grab_data(file_directory, toner_file_list)
@@ -70,32 +69,23 @@ def send_email(low_level_message, level_increase_message):
     port = 587
     smtp_server = "smtp.office365.com"
     login_email = config.email_login
-    from_address = "exmaple@example.com"
-    to_address = "person@example.com"
+    from_address = "it@bedrocklogistics.com"
+    to_address = ["bedrocktest@mailinator.com", "bedrocktest1@mailinator.com"]
     password = config.email_password
-
-    body = ""
-    subject = ""
-
-    # just for a easy reminder so the file doesn't get too large over time.
-    log_size = os.path.getsize('tonerlevels.log')
 
     # this if elif block is just to help format the email so there are not extra newlines for no reason
     if low_level_message and level_increase_message:
         subject = "Subject: Printer(s) Toner Level is Low and Increased from Yesterday!"
         body = f"{low_level_message}\n{level_increase_message}\n" \
-               f"The Konica phone number is (800) 456-5664 and their website is www.mykmbs.com.\n\n\n\n" \
-               f"The log file (tonerlevels.log) is {log_size} bytes which is ~{log_size*0.000001:.3f} MB."
+               f"The Konica phone number is (800) 456-5664 and their website is www.mykmbs.com.\n"
     elif low_level_message and not level_increase_message:
         subject = "Subject: Printer(s) Toner Level is Low!"
         body = f"{low_level_message}\n" \
-               f"The Konica phone number is (800) 456-5664 and their website is www.mykmbs.com.\n\n\n\n" \
-               f"The log file (tonerlevels.log) is {log_size} bytes which is ~{log_size*0.000001:.3f} MB."
+               f"The Konica phone number is (800) 456-5664 and their website is www.mykmbs.com.\n"
     elif not low_level_message and level_increase_message:
         subject = "Subject: Printer(s) Toner Level Increased from Yesterday!"
         body = f"{level_increase_message}\n" \
-               f"The Konica phone number is (800) 456-5664 and their website is www.mykmbs.com.\n\n\n\n" \
-               f"The log file (tonerlevels.log) is {log_size} bytes which is ~{log_size*0.000001:.3f} MB."
+               f"The Konica phone number is (800) 456-5664 and their website is www.mykmbs.com.\n"
     else:  # another safety check so no blank emails are sent because I believe sometimes a stray is sent
         logging.info("low_level_message and level_increase_message are both empty")
         logging.info("TonerLevels.py script has ended.")
@@ -104,7 +94,7 @@ def send_email(low_level_message, level_increase_message):
     # create a multipart message and set headers
     message = MIMEMultipart()
     message["From"] = login_email
-    message["To"] = to_address
+    message["To"] = ', '.join(to_address)
     message["Subject"] = subject
     # add body to the email
     message.attach(MIMEText(body, "plain"))
